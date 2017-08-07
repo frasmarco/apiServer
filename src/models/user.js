@@ -9,7 +9,8 @@ var db = require("../db");
  * @param {function} [cb]
  */
 const findById = function(id, cb) {
-    db.query("SELECT * FROM user_profile WHERE user_id = $1", [id], function(err, result) {
+    db.query("SELECT user_profile.*,role FROM user_profile\
+     INNER JOIN user_account ON user_id = id WHERE user_id = $1", [id], function(err, result) {
         if (err) {
             return cb(err);
         } else {

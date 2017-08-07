@@ -76,7 +76,7 @@ app.get('/token',
   require('connect-ensure-login').ensureLoggedIn(),
   function(req, res){
     const token = jwt.sign(
-      { "role": "registered",
+      { "role": req.user.role,
       "user_id": req.user.user_id,
       "aud": "postgraphql",
       "iss": "postgraphql"
