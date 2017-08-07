@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/frasmarco/apiServer.git"
+    "url": "git@github.com:frasmarco/apiServer.git"
   },
   "keywords": [
     "cave",
