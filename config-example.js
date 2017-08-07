@@ -8,19 +8,19 @@ module.exports = {
         ssl: true
     },
     google: {
-        clientID: "533430902380-n4253pagu1flquphvvu01476ksm92815.apps.googleusercontent.com",
-        clientSecret: "emKoDm4JsbXdp9cOLoz98Ru0",
+        clientID: "xxxx",
+        clientSecret: "xxxx",
         callbackURL: "http://localhost/auth/google/callback"
     },
     facebook: {
-        clientID: "1816236898393920",
-        clientSecret: "8f0b66d0926eb0507453dc89675d78c0",
+        clientID: "xxxx",
+        clientSecret: "xxxx",
         callbackURL: "http://localhost/auth/facebook/callback",
         profileFields: ["id", "first_name", "last_name", "email"]
     },
     linkedin: {
-        consumerKey: "77t62mr12ezjmx",
-        consumerSecret: "5Nk7zuHveQE5nN6b",
+        consumerKey: "xxxx",
+        consumerSecret: "xxx",
         callbackURL: "http://localhost/auth/linkedin/callback",
         profileFields: ['id', 'first-name', 'last-name', 'email-address']
     },
@@ -29,8 +29,8 @@ module.exports = {
         graphiql: true,
         pgDefaultRole: "anonymous",
         jwtPgTypeIdentifier: "public.jwt_token",
-        jwtSecret: "pYXQiOjE1MDE0MTMzN",
+        jwtSecret: "xxx",
         watchPg: true
     },
-    sessionSecret: "pYXQiOjE1MDE0MTMzN"
+    sessionSecret: "xxx"
 };
