@@ -13,6 +13,7 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+// TODO: Configure session in pg and set max age
 app.use(require('express-session')(
   { secret: config.sessionSecret, resave: false, saveUninitialized: false }
 ));
