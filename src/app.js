@@ -37,9 +37,9 @@ app.get('/login',
     res.render('login');
   });  
 app.post('/login', 
-  passport.authenticate('local', { failureRedirect: '/login' }),
+  passport.authenticate('local', { failureRedirect: '/' }),
   function(req, res) {
-    res.redirect('/token');
+    res.redirect('/web/home');
   });  
 app.get('/logout',
   function(req, res){
@@ -50,25 +50,25 @@ app.get('/logout',
 app.get('/auth/google',
   passport.authenticate('google', { scope: ['profile email'] }));
 app.get('/auth/google/callback', 
-  passport.authenticate('google', { failureRedirect: '/login' }),
+  passport.authenticate('google', { failureRedirect: '/' }),
   function(req, res) {
-    res.redirect('/token');
+    res.redirect('/web/home');
 });
 // Facebook OAuth2
 app.get('/auth/facebook',
   passport.authenticate('facebook', { scope : 'email' }));
 app.get('/auth/facebook/callback', 
-  passport.authenticate('facebook', { failureRedirect: '/login' }),
+  passport.authenticate('facebook', { failureRedirect: '/' }),
   function(req, res) {
-    res.redirect('/token');
+    res.redirect('/web/home');
 });
 // LinkedIn OAuth2
 app.get('/auth/linkedin',
   passport.authenticate('linkedin', { scope: ['r_basicprofile', 'r_emailaddress'] }));
 app.get('/auth/linkedin/callback', 
-  passport.authenticate('linkedin', { failureRedirect: '/login' }),
+  passport.authenticate('linkedin', { failureRedirect: '/' }),
   function(req, res) {
-    res.redirect('/token');
+    res.redirect('/web/home');
 });
   
 // JWT Token release
@@ -82,9 +82,7 @@ app.get('/token',
       "aud": "postgraphql",
       "iss": "postgraphql"
     }, config.graphQl.jwtSecret, { expiresIn : '60s' });
-    //res.send(token);
     res.json({ token : token });
-    //res.render('profile', { user: req.user });
 });
 
 // catch 404 and forward to error handler
