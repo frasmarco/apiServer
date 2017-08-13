@@ -39,7 +39,7 @@ app.get('/login',
 app.post('/login', 
   passport.authenticate('local', { failureRedirect: '/' }),
   function(req, res) {
-    res.redirect('/web/home');
+    res.redirect(config.loginTarget);
   });  
 app.get('/logout',
   function(req, res){
@@ -52,7 +52,7 @@ app.get('/auth/google',
 app.get('/auth/google/callback', 
   passport.authenticate('google', { failureRedirect: '/' }),
   function(req, res) {
-    res.redirect('/web/home');
+    res.redirect(config.loginTarget);
 });
 // Facebook OAuth2
 app.get('/auth/facebook',
@@ -60,7 +60,7 @@ app.get('/auth/facebook',
 app.get('/auth/facebook/callback', 
   passport.authenticate('facebook', { failureRedirect: '/' }),
   function(req, res) {
-    res.redirect('/web/home');
+    res.redirect(config.loginTarget);
 });
 // LinkedIn OAuth2
 app.get('/auth/linkedin',
@@ -68,7 +68,7 @@ app.get('/auth/linkedin',
 app.get('/auth/linkedin/callback', 
   passport.authenticate('linkedin', { failureRedirect: '/' }),
   function(req, res) {
-    res.redirect('/web/home');
+    res.redirect(config.loginTarget);
 });
   
 // JWT Token release

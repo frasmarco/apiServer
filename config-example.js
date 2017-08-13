@@ -32,5 +32,6 @@ module.exports = {
         jwtSecret: "xxx",
         watchPg: true
     },
-    sessionSecret: "xxx"
+    sessionSecret: "xxx",
+    loginTarget: '/web/home'
 };
