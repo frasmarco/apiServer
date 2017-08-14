@@ -1,6 +1,6 @@
 const express = require('express');
 const logger = require('morgan');
-const cookieParser = require('cookie-parser');
+// const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const postgraphql = require('postgraphql').postgraphql;
 const db = require('./db');
@@ -12,7 +12,7 @@ const app = express();
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
+// app.use(cookieParser());
 // TODO: Configure session in pg and set max age
 app.use(require('express-session')(
   { secret: config.sessionSecret, resave: false, saveUninitialized: false }
@@ -32,16 +32,16 @@ app.use(passport.session());
 
 // Passport routes
 // Local auth
-app.get('/login',
+app.get('/auth/login',
   function(req, res) {
     res.render('login');
   });  
-app.post('/login', 
+app.post('/auth/login', 
   passport.authenticate('local', { failureRedirect: '/' }),
   function(req, res) {
     res.redirect(config.loginTarget);
   });  
-app.get('/logout',
+app.get('/auth/logout',
   function(req, res){
     req.logout();
     res.redirect('/');
@@ -73,8 +73,8 @@ app.get('/auth/linkedin/callback',
   
 // JWT Token release
 const jwt = require('jsonwebtoken');
-app.get('/token',
-  require('connect-ensure-login').ensureLoggedIn(),
+app.get('/auth/token',
+  require('connect-ensure-login').ensureLoggedIn({ redirectTo: '/auth/login'}),
   function(req, res){
     const token = jwt.sign(
       { "role": req.user.role,
