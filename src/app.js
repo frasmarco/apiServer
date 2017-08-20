@@ -93,7 +93,7 @@ app.get(
                 iss: "postgraphql"
             },
             config.graphQl.jwtSecret,
-            { expiresIn: "60s" }
+            { expiresIn: config.jwtMaxAge }
         );
         res.json({ token: token });
     }
