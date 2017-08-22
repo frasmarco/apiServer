@@ -103,7 +103,11 @@ ALTER TABLE public.user_profile
 
 GRANT SELECT ON TABLE public.user_profile TO anonymous;
 
-GRANT UPDATE, DELETE ON TABLE public.user_profile TO registered;
+GRANT DELETE ON TABLE public.user_profile TO registered;
+
+REVOKE UPDATE ON public.user_profile FROM registered;
+GRANT UPDATE(first_name, last_name,display_name,picture,gender,location,website)
+ON public.user_profile TO registered;
 
 -- Trigger: update_updated_at
 
