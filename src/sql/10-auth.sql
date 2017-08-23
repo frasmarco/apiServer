@@ -290,3 +290,18 @@ REVOKE ALL ON FUNCTION public."current_user"() FROM PUBLIC;
 
 COMMENT ON FUNCTION public."current_user"()
     IS 'Gets the user who was identified by our JWT.';
+
+-- Table: private.user_session
+
+-- DROP TABLE private.user_session;
+
+CREATE TABLE private.user_session
+(
+    sid character varying COLLATE pg_catalog."default" NOT NULL,
+    sess jsonb NOT NULL,
+    expire timestamp(6) without time zone NOT NULL,
+    CONSTRAINT user_session_pkey PRIMARY KEY (sid)
+)
+WITH (
+    OIDS = FALSE
+);

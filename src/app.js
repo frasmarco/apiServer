@@ -5,15 +5,22 @@ const postgraphql = require("postgraphql").postgraphql;
 const db = require("./db");
 const config = require("../config");
 const passport = require("./passport");
+const session = require("express-session");
+const pgSession = require("connect-pg-simple")(session);
 
 const app = express();
 
 app.use(logger("dev"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-// TODO: Configure session in pg and set max age
+
 app.use(
-    require("express-session")({
+    session({
+        store: new pgSession({
+            pool: db,
+            tableName: "user_session",
+            schemaName: "private"
+        }),
         secret: config.sessionSecret,
         resave: false,
         saveUninitialized: false,
