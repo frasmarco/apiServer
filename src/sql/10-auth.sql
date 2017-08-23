@@ -1,3 +1,5 @@
+SET SESSION AUTHORIZATION 'api';
+
 -- Type: jwt_token
 
 -- DROP TYPE public.jwt_token;
@@ -99,15 +101,15 @@ WITH (
 TABLESPACE pg_default;
 
 ALTER TABLE public.user_profile
-    OWNER to postgres;
-
-GRANT SELECT, DELETE, UPDATE ON TABLE public.user_profile TO administrator;
+    OWNER to api;
 
 GRANT SELECT ON TABLE public.user_profile TO anonymous;
 
-GRANT ALL ON TABLE public.user_profile TO postgres;
+GRANT DELETE ON TABLE public.user_profile TO registered;
 
-GRANT SELECT, UPDATE, DELETE ON TABLE public.user_profile TO registered;
+REVOKE UPDATE ON public.user_profile FROM registered;
+GRANT UPDATE(first_name, last_name,display_name,picture,gender,location,website)
+ON public.user_profile TO registered;
 
 -- Trigger: update_updated_at
 
@@ -149,7 +151,7 @@ WITH (
 TABLESPACE pg_default;
 
 ALTER TABLE public.user_login
-    OWNER to postgres;
+    OWNER to api;
 COMMENT ON TABLE public.user_login
     IS 'External logins with security tokens (e.g. Google, Facebook, Twitter)';
 
@@ -211,8 +213,6 @@ ALTER FUNCTION public.authenticate(text, text)
 
 GRANT EXECUTE ON FUNCTION public.authenticate(text, text) TO anonymous;
 
-GRANT EXECUTE ON FUNCTION public.authenticate(text, text) TO api;
-
 REVOKE ALL ON FUNCTION public.authenticate(text, text) FROM PUBLIC;
 
 COMMENT ON FUNCTION public.authenticate(text, text)
@@ -254,8 +254,6 @@ $BODY$;
 ALTER FUNCTION public.register_user(text, text, text, text)
     OWNER TO api;
 
-GRANT EXECUTE ON FUNCTION public.register_user(text, text, text, text) TO api;
-
 REVOKE ALL ON FUNCTION public.register_user(text, text, text, text) FROM PUBLIC;
 
 COMMENT ON FUNCTION public.register_user(text, text, text, text)
@@ -283,8 +281,6 @@ ALTER FUNCTION public."current_user"()
     OWNER TO api;
 
 GRANT EXECUTE ON FUNCTION public."current_user"() TO registered;
-
-GRANT EXECUTE ON FUNCTION public."current_user"() TO api;
 
 REVOKE ALL ON FUNCTION public."current_user"() FROM PUBLIC;
 
