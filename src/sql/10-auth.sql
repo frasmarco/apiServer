@@ -1,3 +1,5 @@
+SET SESSION AUTHORIZATION 'api';
+
 -- Type: jwt_token
 
 -- DROP TYPE public.jwt_token;

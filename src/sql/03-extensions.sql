@@ -1,3 +1,5 @@
+SET SESSION AUTHORIZATION 'api';
+
 -- Extension: pgcrypto
 
 -- DROP EXTENSION pgcrypto;

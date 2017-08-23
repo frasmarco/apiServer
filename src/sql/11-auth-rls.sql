@@ -1,3 +1,5 @@
+SET SESSION AUTHORIZATION 'api';
+
 -- User profile
 
 ALTER TABLE public.user_profile
