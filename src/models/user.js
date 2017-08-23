@@ -247,10 +247,6 @@ const authenticate = function(username, password, cb) {
     });
 };
 
-const findOrCreate = function() {
-    // TODO: implement
-};
-
 module.exports = {
     findById: findById,
     findByProviderId: findByProviderId,
@@ -258,7 +254,6 @@ module.exports = {
     updateUserLogin: updateUserLogin,
     createUser: createUser,
     createUserLogin: createUserLogin,
-    findOrCreate: findOrCreate,
     findOrCreateByProviderID: findOrCreateByProviderID,
     authenticate: authenticate
 };

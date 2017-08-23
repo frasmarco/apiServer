@@ -31,7 +31,6 @@ app.use(
 app.use(postgraphql(db, config.graphQl));
 
 // Configure view engine to render EJS templates.
-// TODO: Disable views!!
 app.set("views", __dirname + "/views");
 app.set("view engine", "ejs");
 
