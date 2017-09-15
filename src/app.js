@@ -105,6 +105,24 @@ app.get(
     }
 );
 
+// Handle uploads
+var multer  = require('multer');
+var upload = multer({limits: {fileSize: 1073741824}});
+app.post('/upload/file', upload.single('file'), function (req, res, cb) {
+    // req.file is the file
+    // req.body will hold the text fields, if there were any
+});
+
+app.post('/upload/image', upload.single('image'), function (req, res, cb) {
+    // req.file is the file
+    // req.body will hold the text fields, if there were any
+});
+
+app.post('/upload/files', upload.array('files'), function (req, res, cb) {
+    // req.files is array of  files
+    // req.body will contain the text fields, if there were any
+});
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
     const err = new Error("Not Found");
