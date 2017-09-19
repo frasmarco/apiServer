@@ -108,6 +108,9 @@ app.get(
 // Handle uploads
 var multer  = require('multer');
 var upload = multer({limits: {fileSize: 1073741824}});
+app.get("/upload/file", function(req, res) {
+    res.render("upload");
+});
 app.post('/upload/file', upload.single('file'), function (req, res, cb) {
     // req.file is the file
     // req.body will hold the text fields, if there were any
