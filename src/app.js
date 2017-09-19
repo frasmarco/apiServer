@@ -106,22 +106,34 @@ app.get(
 );
 
 // Handle uploads
-var multer  = require('multer');
-var upload = multer({limits: {fileSize: 1073741824}});
+var multer = require("multer");
+var upload = multer({
+    limits: {
+        fieldSize: 512,
+        fields: 20,
+        fileSize: 1073741824,
+        files: 100,
+        parts: 120,
+        headerPairs: 120
+    },
+    dest: "/tmp/apiServer"
+});
 app.get("/upload/file", function(req, res) {
     res.render("upload");
 });
-app.post('/upload/file', upload.single('file'), function (req, res, cb) {
+app.post("/upload/file", upload.single("file"), function(req, res, cb) {
+    // req.file is the file
+    // req.body will hold the text fields, if there were any
+    console.log(req.file);
+    res.status(204).end();
+});
+
+app.post("/upload/image", upload.single("image"), function(req, res, cb) {
     // req.file is the file
     // req.body will hold the text fields, if there were any
 });
 
-app.post('/upload/image', upload.single('image'), function (req, res, cb) {
-    // req.file is the file
-    // req.body will hold the text fields, if there were any
-});
-
-app.post('/upload/files', upload.array('files'), function (req, res, cb) {
+app.post("/upload/files", upload.array("files"), function(req, res, cb) {
     // req.files is array of  files
     // req.body will contain the text fields, if there were any
 });

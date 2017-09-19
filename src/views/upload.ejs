@@ -1,4 +1,5 @@
-<form>
-<input type="file" id="input">
-<input type="button" value="Upload"/>
+<form action="/upload/file" method="post" enctype="multipart/form-data">
+    <input type="text" name="description" value="some text">
+    <input type="file" id="file" name="file">
+    <button type="submit">Submit</button>
 </form>
