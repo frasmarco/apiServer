@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/frasmarco/apiServer#readme",
   "dependencies": {
+    "aws-sdk": "^2.118.0",
     "body-parser": "^1.17.2",
     "connect-ensure-login": "^0.1.1",
     "connect-pg-simple": "^4.2.1",
@@ -34,6 +35,8 @@
     "express-session": "^1.15.4",
     "graphql": "^0.10.5",
     "jsonwebtoken": "^7.4.1",
+    "md5": "^2.2.1",
+    "mmmagic": "^0.4.5",
     "morgan": "^1.8.2",
     "multer": "^1.3.0",
     "passport": "^0.3.2",
@@ -44,7 +47,8 @@
     "passport-twitter": "^1.0.4",
     "pg": "^6.4.1",
     "postgraphql": "^3.3.0",
-    "pretty-error": "^2.1.1"
+    "pretty-error": "^2.1.1",
+    "sharp": "^0.18.4"
   },
   "devDependencies": {
     "eslint": "^4.3.0",
