@@ -1,5 +1,7 @@
 // Utility functions for file analysis and persistence.
-var db = require("../db");
+const db = require("../db");
+const fs = require('fs');
+const md5 = require("md5");
 
 /**
  * Handle file upload
@@ -7,9 +9,31 @@ var db = require("../db");
  * @param {function} [cb]
  */
 const handleFile = function(file, cb) {
-    // req.file is the file
-    // req.body will hold the text fields, if there were any
     console.log(file);
+    fs.readFile(file.path, function(err, buf) {
+        const fileMd5 = md5(buf);
+        findByMd5(fileMd5, function(err, result){
+            if (err) {
+                return cb(err);
+            } else {
+                if (result) {
+                    // file is already in db!
+                    return(false, fileMd5);
+                } else {
+                    createFile(fileMd5, file.mimetype, file.originalname, function(err, result) {
+                        if (err) {
+                            return cb(err);
+                        } else {
+                            return cb(false, result);
+                        }
+
+                    });
+                    return(false, fileMd5);
+                }
+            }
+
+        });
+      });
 };
 
 /**
@@ -33,21 +57,11 @@ const findByMd5 = function(md5, cb) {
 };
 
 
-// Create file 
-const createFile = function(email, firstName, lastName, cb) {
-    const query =
-        "WITH rows AS (\
-          INSERT INTO user_account\
-  	        (email, email_confirmed)\
-          VALUES\
-            ($1, true)\
-        RETURNING id\
-        )\
-        INSERT INTO user_profile (user_id, first_name, last_name, display_name)\
-        SELECT id, $2, $3, $4\
-        FROM rows\
-        RETURNING *";
-    db.query(query, [email, firstName, lastName, firstName + " " + lastName], function(
+// Create file in DB
+const createFile = function(md5, mimeType, fileName, cb) {
+    // TODO : rewrite query to return created row
+    const query ="INSERT INTO file (md5, mime_type, file_name) VALUES ($1, $2, $3);";
+    db.query(query, [md5, mimeType, fileName], function(
         err,
         result
     ) {

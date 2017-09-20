@@ -123,6 +123,8 @@ app.get("/upload/file", function(req, res) {
     res.render("upload");
 });
 app.post("/upload/file", upload.single("file"), function(req, res, cb) {
+    // req.file is the file
+    // req.body will hold the text fields, if there were any
     file.handleFile(req.file, cb);
     res.status(204).end();
 });

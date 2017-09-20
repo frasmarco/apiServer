@@ -2,7 +2,7 @@
 CREATE TABLE public.file (
   md5 UUID,
   mime_type VARCHAR(30) NOT NULL,
-  filename INTEGER NOT NULL,
+  file_name VARCHAR NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   created_by UUID NOT NULL REFERENCES public.user_profile(user_id),
   deleted BOOLEAN DEFAULT false,
