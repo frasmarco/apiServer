@@ -106,7 +106,7 @@ app.get(
 );
 
 // Handle uploads
-var multer = require("multer");
+const multer = require("multer");
 var upload = multer({
     limits: {
         fieldSize: 512,
@@ -118,13 +118,12 @@ var upload = multer({
     },
     dest: "/tmp/apiServer"
 });
+const file = require("./models/file");
 app.get("/upload/file", function(req, res) {
     res.render("upload");
 });
 app.post("/upload/file", upload.single("file"), function(req, res, cb) {
-    // req.file is the file
-    // req.body will hold the text fields, if there were any
-    console.log(req.file);
+    file.handleFile(req.file, cb);
     res.status(204).end();
 });
 

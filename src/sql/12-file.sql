@@ -1,5 +1,5 @@
 
-CREATE TABLE public.files (
+CREATE TABLE public.file (
   md5 UUID,
   mime_type VARCHAR(30) NOT NULL,
   filename INTEGER NOT NULL,
@@ -10,11 +10,11 @@ CREATE TABLE public.files (
 ) 
 WITH (oids = false);
 
-COMMENT ON COLUMN public.files.md5
+COMMENT ON COLUMN public.file.md5
 IS 'MD5 hash of file contents';
 
-COMMENT ON COLUMN public.files.mime_type
+COMMENT ON COLUMN public.file.mime_type
 IS 'Mime Type derived from actual file contents';
 
-COMMENT ON COLUMN public.files.filename
+COMMENT ON COLUMN public.file.filename
 IS 'Original filename';
