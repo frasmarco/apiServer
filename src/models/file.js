@@ -2,6 +2,8 @@
 const db = require("../db");
 const fs = require('fs');
 const md5 = require("md5");
+const mmm = require('mmmagic');
+const magic = new mmm.Magic(mmm.MAGIC_MIME_TYPE);
 
 /**
  * Handle file upload
@@ -20,13 +22,19 @@ const handleFile = function(file, cb) {
                     // file is already in db!
                     return(false, fileMd5);
                 } else {
-                    createFile(fileMd5, file.mimetype, file.originalname, function(err, result) {
-                        if (err) {
-                            return cb(err);
-                        } else {
-                            return cb(false, result);
+                    magic.detect(buf, function(err, mimeTypeResult) {
+                        if (err) throw err;
+                        else {
+                            createFile(fileMd5, mimeTypeResult, file.originalname, function(err) {
+                                if (err) {
+                                    throw err;
+                                } else {
+                                    return fileMd5;
+                                }
+        
+                            });
                         }
-
+                        
                     });
                     return(false, fileMd5);
                 }
@@ -59,8 +67,7 @@ const findByMd5 = function(md5, cb) {
 
 // Create file in DB
 const createFile = function(md5, mimeType, fileName, cb) {
-    // TODO : rewrite query to return created row
-    const query ="INSERT INTO file (md5, mime_type, file_name) VALUES ($1, $2, $3);";
+    const query ="INSERT INTO file (md5, mime_type, file_name) VALUES ($1, $2, $3) RETURNING *";
     db.query(query, [md5, mimeType, fileName], function(
         err,
         result
