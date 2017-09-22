@@ -118,25 +118,22 @@ var upload = multer({
     },
     dest: "/tmp/apiServer"
 });
-const file = require("./models/file");
+const Upload = require("./upload");
 app.get("/upload/file", function(req, res) {
     res.render("upload");
 });
 app.post("/upload/file", upload.single("file"), function(req, res, cb) {
     // req.file is the file
     // req.body will hold the text fields, if there were any
-    file.handleFile(req.file, cb);
+    Upload.handleFile(req.file, cb);
     res.status(204).end();
-});
-
-app.post("/upload/image", upload.single("image"), function(req, res, cb) {
-    // req.file is the file
-    // req.body will hold the text fields, if there were any
 });
 
 app.post("/upload/files", upload.array("files"), function(req, res, cb) {
     // req.files is array of  files
     // req.body will contain the text fields, if there were any
+    Upload.handleFiles(req.files, cb);
+    res.status(204).end();
 });
 
 // catch 404 and forward to error handler

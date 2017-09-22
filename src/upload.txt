@@ -1,0 +1,27 @@
+                            File.createFile(fileMd5, mimeTypeResult, file.originalname, function(err) {
+                                if (err) {
+                                    return err;
+                                } else {
+                                    const params = {
+                                        Bucket: config.bucketName,
+                                        Key: config.documentsPrefix + fileMd5,
+                                        Body: buf,
+                                        ContentMD5: new Buffer(fileMd5, "hex").toString('base64'),
+                                        ContentType: mimeTypeResult
+                                        //Tagging: "key1=value1&key2=value2",
+                                        //StorageClass: REDUCED_REDUNDANCY
+                                    };
+                                    s3.putObject(params, function(err, data) {
+                                        if (err) console.log(err);
+                                        else
+                                            console.log(
+                                                "Successfully uploaded data to " +
+                                                    config.bucketName +
+                                                    "/" +
+                                                    config.documentsPrefix +
+                                                    fileMd5
+                                            );
+                                    });
+                                    return fileMd5;
+                                }
+                            });
