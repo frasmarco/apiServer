@@ -4,7 +4,7 @@ const crypto = require("crypto");
 const mmm = require("mmmagic");
 const magic = new mmm.Magic(mmm.MAGIC_MIME_TYPE);
 const sharp = require("sharp");
-const S3 = require("aws-sdk/clients/s3");
+const AWS = require("aws-sdk");
 const config = require("../config");
 const File = require("./models/file");
 
@@ -17,20 +17,26 @@ const handleFile = function(file, cb) {
     analyzeFile(file.path, function(fileMd5, mimeTypeResult, buf) {
         File.findByMd5(fileMd5, function(err, result) {
             if (err) return cb(err);
-            if (result) return cb(null, fileMd5);
+            //if (result) return cb(null, fileMd5);
+            if (result) return;
             console.log("Md5: " + fileMd5 + "; MimeType: " + mimeTypeResult);
             const params = {
                 Bucket: config.aws.bucketName,
                 Key: config.aws.documentsPrefix + fileMd5,
                 Body: buf,
-                ContentMD5: new Buffer(fileMd5, "hex").toString("base64"),
+                //ContentMD5: new Buffer(fileMd5, "hex").toString("base64"),
                 ContentType: mimeTypeResult
                 //Tagging: "key1=value1&key2=value2",
                 //StorageClass: REDUCED_REDUNDANCY
             };
-            const s3 = new S3();
-            s3.putObject(params, function(err, data) {
-            //s3.upload(params, function(err, data) {
+            const s3 = new AWS.S3({endpoint: new AWS.Endpoint(config.aws.endpoint)});
+            const upload = new AWS.S3.ManagedUpload({
+                params: params,
+                tags: [{Key: "type", Value: "image"}],
+                service: s3
+            });
+            //s3.putObject(params, function(err, data) {
+            upload.send(function(err, data) {
                 if (err) console.log(err);
                 else {
                     console.log(
