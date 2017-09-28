@@ -24,10 +24,7 @@ const handleFile = function(file, cb) {
                 Bucket: config.aws.bucketName,
                 Key: config.aws.documentsPrefix + fileMd5,
                 Body: buf,
-                //ContentMD5: new Buffer(fileMd5, "hex").toString("base64"),
                 ContentType: mimeTypeResult
-                //Tagging: "key1=value1&key2=value2",
-                //StorageClass: REDUCED_REDUNDANCY
             };
             const s3 = new AWS.S3({endpoint: new AWS.Endpoint(config.aws.endpoint)});
             const upload = new AWS.S3.ManagedUpload({
@@ -35,19 +32,20 @@ const handleFile = function(file, cb) {
                 tags: [{Key: "type", Value: "image"}],
                 service: s3
             });
-            //s3.putObject(params, function(err, data) {
             upload.send(function(err, data) {
                 if (err) console.log(err);
                 else {
                     console.log(
                         "Successfully uploaded data to " +
-                            config.aws.bucketName +
+                            params.Bucket +
                             "/" +
-                            config.aws.documentsPrefix +
-                            fileMd5
+                            params.Key
                     );
                     File.createFile(fileMd5, mimeTypeResult, file.originalname, function(err, result) {
                     });
+                    if (isImage(mimeTypeResult)) {
+                        makeLowres(buf, fileMd5, file.path);
+                    }
                 }
             });
         });
@@ -94,6 +92,77 @@ const analyzeFile = function(path, cb) {
                 return cb(hash.digest("hex"), mimeTypeResult, buf);
             }
         });
+    });
+};
+
+/**
+ * 
+ * @param {*} buf 
+ */
+
+
+const makeLowres = function(buf, fileMd5, path) {
+    const images = [];
+    sharp(buf).metadata().then(function(metadata) {
+        if (metadata.height > config.miniatures.maxHeight || metadata.width > config.miniatures.maxWidht ) {
+            images.push(makeMiniature(buf, fileMd5, path, metadata.format));
+        }
+        if(metadata.height > config.thumbnails.maxHeight || metadata.width > config.thumbnails.maxWidht ) {
+            images.push(makeThumb(buf, fileMd5, path));
+        }
+    })
+    .then(function() {
+        Promise.all(images).then(function(elements) {
+            elements.map(function(image) {
+            });
+        });
+    });
+};
+
+const makeThumb = function(buf, fileMd5, path) {
+    return sharp(buf)
+    .resize(config.thumbnails.maxWidht, config.thumbnails.maxHeight)
+    .max()
+    .toFormat('png')
+    .toFile(path + "-" + config.thumbnails.dimensions + ".png");
+};
+
+const makeMiniature = function(buf, fileMd5, path, format) {
+    format = format == "jpeg" ? "jpeg" : "png";
+    console.log(format);
+    return sharp(buf)
+    .resize(config.miniatures.maxWidht, config.miniatures.maxHeight)
+    .max()
+    .toFormat(format)
+    .toFile(path + "-" + config.miniatures.dimensions + "." + format);
+};
+
+const lowresToS3 = function(path, md5) {
+
+    const params = {
+        Bucket: config.aws.bucketName,
+        Key: config.aws.thumbsPrefix + md5 + "-" + size.dimensions + ".png",
+        Body: outputBuffer,
+        ContentType: "image/png",
+        StorageClass: "REDUCED_REDUNDANCY"
+    };
+    const s3 = new AWS.S3({endpoint: new AWS.Endpoint(config.aws.endpoint)});
+    const upload = new AWS.S3.ManagedUpload({
+        params: params,
+        tags: [{Key: "type", Value: "image"}],
+        service: s3
+    });
+    upload.send(function(err, data) {
+        if (err) console.log(err);
+        else {
+            console.log(
+                "Successfully uploaded data to " +
+                    params.Bucket +
+                    "/" +
+                    params.Key
+            );
+            //TODO: mark thumb present in db
+        }
     });
 };
 
