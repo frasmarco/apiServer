@@ -6,6 +6,9 @@ const magic = new mmm.Magic(mmm.MAGIC_MIME_TYPE);
 const sharp = require("sharp");
 const AWS = require("aws-sdk");
 const config = require("../config");
+const s3 = new AWS.S3({
+    endpoint: new AWS.Endpoint(config.aws.endpoint),
+    httpOptions: {timeout: 5 * 60 * 1000}});
 const File = require("./models/file");
 
 /**
@@ -26,7 +29,6 @@ const handleFile = function(file, cb) {
                 Body: buf,
                 ContentType: mimeTypeResult
             };
-            const s3 = new AWS.S3({ endpoint: new AWS.Endpoint(config.aws.endpoint) });
             const upload = new AWS.S3.ManagedUpload({
                 params: params,
                 tags: [{ Key: "type", Value: "image" }],
@@ -160,7 +162,6 @@ const lowresToS3 = function(path, md5) {
         StorageClass: "REDUCED_REDUNDANCY",
         ACL: "public-read"
     };
-    const s3 = new AWS.S3({ endpoint: new AWS.Endpoint(config.aws.endpoint) });
     const upload = new AWS.S3.ManagedUpload({
         params: params,
         tags: [{ Key: "type", Value: "imageThumbnail" }],
