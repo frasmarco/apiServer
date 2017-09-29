@@ -14,8 +14,8 @@ const File = require("./models/file");
  * @param {function} [cb]
  */
 const handleFile = function(file, cb) {
-    analyzeFile(file.path, function(fileMd5, mimeTypeResult, buf) {
-        File.findByMd5(fileMd5, function(err, result) {
+    analyzeFile(file.path, (fileMd5, mimeTypeResult, buf) => {
+        File.findByMd5(fileMd5, (err, result) => {
             if (err) return cb(err);
             //if (result) return cb(null, fileMd5);
             if (result) return;
@@ -26,23 +26,18 @@ const handleFile = function(file, cb) {
                 Body: buf,
                 ContentType: mimeTypeResult
             };
-            const s3 = new AWS.S3({endpoint: new AWS.Endpoint(config.aws.endpoint)});
+            const s3 = new AWS.S3({ endpoint: new AWS.Endpoint(config.aws.endpoint) });
             const upload = new AWS.S3.ManagedUpload({
                 params: params,
-                tags: [{Key: "type", Value: "image"}],
+                tags: [{ Key: "type", Value: "image" }],
                 service: s3
             });
             upload.send(function(err, data) {
                 if (err) console.log(err);
                 else {
-                    console.log(
-                        "Successfully uploaded data to " +
-                            params.Bucket +
-                            "/" +
-                            params.Key
-                    );
-                    File.createFile(fileMd5, mimeTypeResult, file.originalname, function(err, result) {
-                    });
+                    console.log("Successfully uploaded s3://" + params.Bucket + "/" + params.Key);
+                    File.createFile(fileMd5, mimeTypeResult, file.originalname,
+                        (err, result) => {});
                     if (isImage(mimeTypeResult)) {
                         makeLowres(buf, fileMd5, file.path);
                     }
@@ -93,6 +88,7 @@ const analyzeFile = function(path, cb) {
             }
         });
     });
+    fs.unlink(path);
 };
 
 /**
@@ -100,69 +96,80 @@ const analyzeFile = function(path, cb) {
  * @param {*} buf 
  */
 
-
 const makeLowres = function(buf, fileMd5, path) {
     const images = [];
-    sharp(buf).metadata().then(function(metadata) {
-        if (metadata.height > config.miniatures.maxHeight || metadata.width > config.miniatures.maxWidht ) {
-            images.push(makeMiniature(buf, fileMd5, path, metadata.format));
-        }
-        if(metadata.height > config.thumbnails.maxHeight || metadata.width > config.thumbnails.maxWidht ) {
-            images.push(makeThumb(buf, fileMd5, path));
-        }
-    })
-    .then(function() {
-        Promise.all(images).then(function(elements) {
-            elements.map(function(image) {
+    sharp(buf)
+        .metadata()
+        .then(function(metadata) {
+            if (
+                metadata.height > config.miniatures.maxHeight ||
+                metadata.width > config.miniatures.maxWidht
+            ) {
+                images.push(makeMiniature(buf, fileMd5, path, metadata.format));
+            }
+            if (
+                metadata.height > config.thumbnails.maxHeight ||
+                metadata.width > config.thumbnails.maxWidht
+            ) {
+                images.push(makeThumb(buf, fileMd5, path));
+            }
+        })
+        .then(function() {
+            Promise.all(images).then(function(elements) {
+                elements.map(function(image) {
+                    lowresToS3(image, fileMd5).then(function(data){
+                        fs.unlink(image);
+                    });
+                });
             });
         });
-    });
 };
 
 const makeThumb = function(buf, fileMd5, path) {
+    const outPath = path + "-" + config.thumbnails.dimensions + ".png";
     return sharp(buf)
-    .resize(config.thumbnails.maxWidht, config.thumbnails.maxHeight)
-    .max()
-    .toFormat('png')
-    .toFile(path + "-" + config.thumbnails.dimensions + ".png");
+        .resize(config.thumbnails.maxWidht, config.thumbnails.maxHeight)
+        .max()
+        .toFormat("png")
+        .toFile(outPath)
+        .then(function() {
+            return outPath;
+        });
 };
 
 const makeMiniature = function(buf, fileMd5, path, format) {
     format = format == "jpeg" ? "jpeg" : "png";
-    console.log(format);
+    const outPath = path + "-" + config.miniatures.dimensions + "." + format;
     return sharp(buf)
-    .resize(config.miniatures.maxWidht, config.miniatures.maxHeight)
-    .max()
-    .toFormat(format)
-    .toFile(path + "-" + config.miniatures.dimensions + "." + format);
+        .resize(config.miniatures.maxWidht, config.miniatures.maxHeight)
+        .max()
+        .toFormat(format)
+        .toFile(outPath)
+        .then(function() {
+            return outPath;
+        });
 };
 
 const lowresToS3 = function(path, md5) {
-
+    const Path = require("path");
     const params = {
         Bucket: config.aws.bucketName,
-        Key: config.aws.thumbsPrefix + md5 + "-" + size.dimensions + ".png",
-        Body: outputBuffer,
-        ContentType: "image/png",
-        StorageClass: "REDUCED_REDUNDANCY"
+        Key: config.aws.thumbsPrefix + md5 + "-" + Path.basename(path).split("-")[1],
+        Body: fs.readFileSync(path),
+        ContentType: "image/" + Path.extname(path).replace(".", ""),
+        StorageClass: "REDUCED_REDUNDANCY",
+        ACL: "public-read"
     };
-    const s3 = new AWS.S3({endpoint: new AWS.Endpoint(config.aws.endpoint)});
+    const s3 = new AWS.S3({ endpoint: new AWS.Endpoint(config.aws.endpoint) });
     const upload = new AWS.S3.ManagedUpload({
         params: params,
-        tags: [{Key: "type", Value: "image"}],
+        tags: [{ Key: "type", Value: "imageThumbnail" }],
         service: s3
     });
-    upload.send(function(err, data) {
-        if (err) console.log(err);
-        else {
-            console.log(
-                "Successfully uploaded data to " +
-                    params.Bucket +
-                    "/" +
-                    params.Key
-            );
-            //TODO: mark thumb present in db
-        }
+    return upload.promise().then(function(data) {
+        console.log("Successfully uploaded s3://" + params.Bucket + "/" + params.Key);
+        return data;
+        //TODO: mark thumb present in db
     });
 };
 
