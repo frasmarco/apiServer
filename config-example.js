@@ -22,7 +22,7 @@ module.exports = {
         consumerKey: "xxxx",
         consumerSecret: "xxx",
         callbackURL: "http://localhost/auth/linkedin/callback",
-        profileFields: ['id', 'first-name', 'last-name', 'email-address']
+        profileFields: ["id", "first-name", "last-name", "email-address"]
     },
     graphQl: {
         dynamicJson: true,
@@ -32,6 +32,37 @@ module.exports = {
         jwtSecret: "xxx",
         watchPg: true
     },
+    aws: {
+        bucketName: "speleowebgis",
+        documentsPrefix: "documents/",
+        thumbsPrefix: "thumbnails/",
+        endpoint: "s3.eu-central-1.amazonaws.com",
+        region: "eu-central-1"
+    },
+    fileTypes: {
+        images: ["image/jpeg", "image/png", "image/tiff", "image/gif"],
+        documents: [
+            "application/msword",
+            "application/pdf",
+            "application/vnd.ms-excel",
+            "application/vnd.ms-office",
+            "application/xml",
+            "text/html",
+            "text/plain"
+        ],
+    },
+    thumbnails: {
+        dimensions: "100x100",
+        maxWidht: 100,
+        maxHeight: 100
+    },
+    miniatures: {
+        dimensions: "1024x768",
+        maxWidht: 1024,
+        maxHeight: 768
+    },
     sessionSecret: "xxx",
-    loginTarget: '/web/home'
+    sessionCookiePath: "/auth",
+    loginTarget: "/web/home",
+    jwtMaxAge: "60s",
 };
