@@ -38,7 +38,7 @@ const handleFile = function(file, cb) {
                 if (err) console.log(err);
                 else {
                     console.log("Successfully uploaded s3://" + params.Bucket + "/" + params.Key);
-                    File.createFile(fileMd5, mimeTypeResult, file.originalname,
+                    File.createFile(fileMd5, mimeTypeResult, file.originalname, buf.byteLength, isImage(mimeTypeResult),
                         (err, result) => {});
                     if (isImage(mimeTypeResult)) {
                         makeLowres(buf, fileMd5, file.path);
@@ -135,6 +135,7 @@ const makeThumb = function(buf, fileMd5, path) {
         .toFormat("png")
         .toFile(outPath)
         .then(function() {
+            File.setHasThumbnail(fileMd5, function() {});
             return outPath;
         });
 };
@@ -148,6 +149,7 @@ const makeMiniature = function(buf, fileMd5, path, format) {
         .toFormat(format)
         .toFile(outPath)
         .then(function() {
+            File.setHasMiniature(fileMd5, function() {});
             return outPath;
         });
 };
