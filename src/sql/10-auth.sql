@@ -273,7 +273,7 @@ AS $BODY$
 
   select *
   from public.user_profile
-  where user_id = current_setting('jwt.claims.user_id')::uuid
+  where user_id = current_setting('jwt.claims.user_id', true)::uuid
 
 $BODY$;
 
