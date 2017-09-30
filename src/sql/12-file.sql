@@ -16,5 +16,5 @@ IS 'MD5 hash of file contents';
 COMMENT ON COLUMN public.file.mime_type
 IS 'Mime Type derived from actual file contents';
 
-COMMENT ON COLUMN public.file.filename
+COMMENT ON COLUMN public.file.fil_ename
 IS 'Original filename';
