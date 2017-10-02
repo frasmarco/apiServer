@@ -12,7 +12,7 @@ CREATE TABLE public.file
     has_thumbnail boolean NOT NULL DEFAULT false,
     has_miniature boolean NOT NULL DEFAULT false,
     created_at timestamp with time zone NOT NULL DEFAULT timezone('utc', now()),
-    created_by uuid REFERENCES public.user_profile (user_id),
+    created_by uuid REFERENCES public.user_profile (user_id) NOT NULL,
     deleted boolean DEFAULT false,
     CONSTRAINT file_pkey PRIMARY KEY (md5),
     CONSTRAINT file_is_image_check CHECK ((is_image AND mime_type LIKE 'image/%') OR (NOT is_image AND NOT mime_type LIKE 'image/%')),

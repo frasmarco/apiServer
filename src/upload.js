@@ -8,15 +8,18 @@ const AWS = require("aws-sdk");
 const config = require("../config");
 const s3 = new AWS.S3({
     endpoint: new AWS.Endpoint(config.aws.endpoint),
-    httpOptions: {timeout: 5 * 60 * 1000}});
+    httpOptions: { timeout: 5 * 60 * 1000 }
+});
 const File = require("./models/file");
 
 /**
  * Handle file upload
  * 
- * @param {function} [cb]
+ * @param {string} file
+ * @param {string} Express.Request.user
+ * @param {function} cb
  */
-const handleFile = function(file, cb) {
+const handleFile = function(file, user, cb) {
     analyzeFile(file.path, (fileMd5, mimeTypeResult, buf) => {
         File.findByMd5(fileMd5, (err, result) => {
             if (err) return cb(err);
@@ -27,19 +30,29 @@ const handleFile = function(file, cb) {
                 Bucket: config.aws.bucketName,
                 Key: config.aws.documentsPrefix + fileMd5,
                 Body: buf,
-                ContentType: mimeTypeResult
+                ContentType: mimeTypeResult,
+                Metadata: {
+                    "filename": file.originalname,
+                },
             };
             const upload = new AWS.S3.ManagedUpload({
                 params: params,
-                tags: [{ Key: "type", Value: "image" }],
+                tags: [{ Key: "type", Value: isImage(mimeTypeResult) ? "image" : "document" }],
                 service: s3
             });
             upload.send(function(err, data) {
                 if (err) console.log(err);
                 else {
                     console.log("Successfully uploaded s3://" + params.Bucket + "/" + params.Key);
-                    File.createFile(fileMd5, mimeTypeResult, file.originalname, buf.byteLength, isImage(mimeTypeResult),
-                        (err, result) => {});
+                    File.createFile(
+                        fileMd5,
+                        mimeTypeResult,
+                        file.originalname,
+                        buf.byteLength,
+                        isImage(mimeTypeResult),
+                        user.user_id,
+                        (err, result) => {}
+                    );
                     if (isImage(mimeTypeResult)) {
                         makeLowres(buf, fileMd5, file.path);
                     }
@@ -52,8 +65,6 @@ const handleFile = function(file, cb) {
 /**
  * Calulates md5 and actual mimeType.
  * If file is a tiff image larger than 10MB compress it.
- * TODO: Warning, if the tiff image cannot be reduced under 10MB
- * we will end in an infinite loop, need to determine if the image is already compressed!
  * 
  * @param {string} path 
  * @param {function} cb
@@ -64,7 +75,10 @@ const analyzeFile = function(path, cb) {
             if (err) throw err;
             else {
                 if (isImage(mimeTypeResult)) {
-                    if (mimeTypeResult == "image/tiff" && buf.byteLength > 1024 * 10240) {
+                    if (
+                        mimeTypeResult == "image/tiff" &&
+                        buf.byteLength > config.tiffCompressThreshold
+                    ) {
                         sharp(buf).metadata().then(function(metadata) {
                             // Sharp tiff options regarding resolution unit of measure
                             // are weird and wrong documented
@@ -75,9 +89,16 @@ const analyzeFile = function(path, cb) {
                                 .toBuffer((err, outBuf) => {
                                     if (err) throw err;
                                     else {
+                                        // If we succed reducing size
                                         // overwrite original file and recursevly call ourself
-                                        fs.writeFileSync(path, outBuf);
-                                        analyzeFile(path, cb);
+                                        if (outBuf.byteLength <= config.tiffCompressThreshold) {
+                                            fs.writeFileSync(path, outBuf);
+                                            analyzeFile(path, cb);
+                                        } else {
+                                            const hash = crypto.createHash("md5");
+                                            hash.update(buf);
+                                            return cb(hash.digest("hex"), mimeTypeResult, buf);
+                                        }
                                     }
                                 });
                         });
@@ -119,7 +140,7 @@ const makeLowres = function(buf, fileMd5, path) {
         .then(function() {
             Promise.all(images).then(function(elements) {
                 elements.map(function(image) {
-                    lowresToS3(image, fileMd5).then(function(data){
+                    lowresToS3(image, fileMd5).then(function(data) {
                         fs.unlink(image);
                     });
                 });
@@ -154,6 +175,12 @@ const makeMiniature = function(buf, fileMd5, path, format) {
         });
 };
 
+/**
+ * 
+ * @param {string} path 
+ * @param {string} md5 
+ */
+
 const lowresToS3 = function(path, md5) {
     const Path = require("path");
     const params = {
@@ -172,7 +199,6 @@ const lowresToS3 = function(path, md5) {
     return upload.promise().then(function(data) {
         console.log("Successfully uploaded s3://" + params.Bucket + "/" + params.Key);
         return data;
-        //TODO: mark thumb present in db
     });
 };
 

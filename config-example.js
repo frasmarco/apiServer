@@ -65,4 +65,5 @@ module.exports = {
     sessionCookiePath: "/auth",
     loginTarget: "/web/home",
     jwtMaxAge: "60s",
+    tiffCompressThreshold: 10 * 1024 * 1024
 };

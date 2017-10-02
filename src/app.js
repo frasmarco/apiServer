@@ -129,7 +129,7 @@ app.post(
     function(req, res, cb) {
         // req.file is the file
         // req.body will hold the text fields, if there were any
-        Upload.handleFile(req.file, cb);
+        Upload.handleFile(req.file, req.user, cb);
         res.status(204).end();
     }
 );
