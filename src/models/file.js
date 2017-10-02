@@ -22,17 +22,26 @@ const findByMd5 = function(md5, cb) {
     });
 };
 
+/**
+ * Find a file knowing his md5 (UUID)
+ * 
+ * @param {string} md5
+ * @return
+ */
+const findByMd5Promise = function(md5) {
+    return db.query("SELECT * FROM file WHERE md5 = $1", [md5]);
+};
 
 /**
  * Create file in DB
  * 
- * @param {string} md5 
- * @param {string} mimeType 
- * @param {string} name 
- * @param {integer} size 
- * @param {boolean} isImage 
- * @param {string} userId 
- * @param {function} cb 
+ * @param {string} md5
+ * @param {string} mimeType
+ * @param {string} name
+ * @param {integer} size
+ * @param {boolean} isImage
+ * @param {string} userId
+ * @param {function} cb
  */
 const createFile = function(md5, mimeType, name, size, isImage, userId, cb) {
     const query =
@@ -50,6 +59,23 @@ const createFile = function(md5, mimeType, name, size, isImage, userId, cb) {
             }
         }
     });
+};
+
+/**
+ * Create file in DB
+ * 
+ * @param {string} md5
+ * @param {string} mimeType
+ * @param {string} name
+ * @param {integer} size
+ * @param {boolean} isImage
+ * @param {string} userId
+ */
+const createFilePromise = function(md5, mimeType, name, size, isImage, userId) {
+    const query =
+        "INSERT INTO file (md5, mime_type, name, size, is_image, created_by)\
+        VALUES ($1, $2, $3, $4, $5, $6) RETURNING *";
+    return db.query(query, [md5, mimeType, name, size, isImage, userId]);
 };
 
 /**
@@ -98,7 +124,9 @@ const setHasMiniature = function(md5, cb) {
 
 module.exports = {
     findByMd5: findByMd5,
+    findByMd5Promise: findByMd5Promise,
     createFile: createFile,
+    createFilePromise: createFilePromise,
     setHasThumbnail: setHasThumbnail,
     setHasMiniature: setHasMiniature
 };

@@ -15,8 +15,8 @@ const File = require("./models/file");
 /**
  * Handle file upload
  * 
- * @param {string} file
- * @param {string} Express.Request.user
+ * @param {Express.Multer.File} file
+ * @param {*} user
  * @param {function} cb
  */
 const handleFile = function(file, user, cb) {
